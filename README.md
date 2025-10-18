@@ -25,3 +25,12 @@ install.packages(c(
 
 ## Project Structure
 See `/code` for analysis scripts and `/data_sets` for example datasets.
+
+---
+
+## Datasets
+- Computes **hourly** mean/SD for voltage, current, and power.
+- **Classifies** each panel-hour as `functional`, `shading`, or `degrading`.
+- Produces a tidy **CSV** for dashboards and QA.
+- Produces a **grid plot** that blends degradation (green-yellow-red) and shading. 
+
