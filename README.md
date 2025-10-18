@@ -3,6 +3,8 @@
 Our R-based tool analyzes utility-scale solar farm performance to flag **shading** vs **degradation** and assign a **0–1 severity score** per panel per hour. 
 
 ---
+## Demonstration Video
+
 
 ## Features
 - Computes **hourly** mean/SD for voltage, current, and power.
