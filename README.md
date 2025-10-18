@@ -4,7 +4,7 @@ Our R-based tool analyzes utility-scale solar farm performance to flag **shading
 
 ---
 ## Demonstration Video
-<iframe width="560" height="315" src="https://www.youtube.com/embed/u5DDuOMd6_M?si=IyyeZEtZak98dY3x" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+https://youtu.be/u5DDuOMd6_M
 
 ## Features
 - Computes **hourly** mean/SD for voltage, current, and power.
