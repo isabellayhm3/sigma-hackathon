@@ -53,7 +53,7 @@ hourly_stats_array(file)
 **Description**  
 Renders a grid heatmap of the solar array where each tile is a panel (`P001`…`P100`).  
 Color encodes a chosen performance metric (default `avg_power`) on a **0–1** scale  
-(low = red, mid = yellow, high = green).
+(little to none = black, low = red, mid = yellow, high = green).
 
 --- 
 
@@ -69,10 +69,10 @@ plot_panel_map(panel_data,
 
 | **Parameter**  | **Type**   | **Required**               | **Description**                                                                    |
 | -------------- | ---------- | -------------------------- | ---------------------------------------------------------------------------------- |
-| `panel_data`   | data frame | Yes                        | Must include `panel_id` (`P001`…`P###`) and a numeric column named by `value_col`. |
+| `panel_data`   | data frame | Yes                        | Raw data for solar panels. |
 | `nrows`        | integer    | No (default 10)            | Number of rows in the farm grid.                                                   |
-| `total_panels` | integer    | No (default 100)           | Total number of panels (used to compute columns).                                  |
-| `value_col`    | string     | No (default `"avg_power"`) | Name of the column to visualize (0–1 recommended).                                 |
+| `total_panels` | integer    | No (default 100)           | Total number of panels.                                  |
+| `value_col`    | string     | No (default `"avg_power"`) | Name of the column to visualize.                                 |
 | `title`        | string     | No                         | Plot title shown above the map.                                                    |
 
 --- 
@@ -92,7 +92,7 @@ average_chart(file)
 
 | **Parameter** | **Type**          | **Required** | **Description**                                                                                  |
 | ------------- | ----------------- | ------------ | ------------------------------------------------------------------------------------------------ |
-| `file`        | string (filepath) | Yes          | Path to a CSV containing at least `panel_id` and `voltage` (numeric). Extra columns are ignored. |
+| `file`        | string (filepath) | Yes          | Path to a CSV containing at least `panel_id` and `voltage` (numeric). |
 
 
 ## Output 
