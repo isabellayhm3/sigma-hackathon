@@ -63,9 +63,9 @@ average_chart <- function(file) {
     geom_hline(yintercept = sd3, linetype = "dotdash") +
     geom_hline(yintercept = sd4, linetype = "dotdash") +
     labs(
-      title = "X̄ Control Chart by Panel (whole day)",
+      title = "Average Control Chart by Day)",
       x = "Panel",
-      y = "Daily Mean Voltage (x̄)"
+      y = "Daily Mean Voltage"
     ) +
     theme_minimal()
   
