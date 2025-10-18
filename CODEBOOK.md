@@ -5,7 +5,7 @@ It also lists each function’s purpose, inputs, outputs, and dependencies to en
 
 ## Overview of Scripts
 
-| Script | Purpose | Key Output |
+| Script | Purpose | Output |
 |--------|----------|-------------|
 | `calculate_performance.R` | Computes hourly statistics for voltage, current, and power across all panels and detects shading and degradation. | 'panel_hourly_performance_sigma.csv' & 'panel_daily_average_sigma.csv' |
 | `plot_panel_map.R` | Creates a color-coded grid visualization of shading and degradation severity. | ggplot |
@@ -124,8 +124,62 @@ Displays a ggplot with xbar control chart
 | `UCL` and `LCL` | Upper and lower control limits, calculated as `xbarbar ± 3 * SE_overall`. |
 | `sd1`, `sd2`, `sd3`, `sd4` | One- and two-standard-deviation guide lines around the center line (`xbarbar`). |
 
+--- 
 
 
+## 4) `calculate_ttf()`  *(defined in `code/calculate_ttf.R`)*
+
+**Description**  
+This function estimates the time to failure (TTF) for each panel
+
+---
+
+**Function Call**
+```r
+calculate_ttf(data_file, failure_threshold = 0.7)
+
+```
+
+### Inputs 
+
+| **Parameter**       | **Type**          | **Required** | **Default** | **Description**                                                                                              |
+| ------------------- | ----------------- | ------------ | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| `data_file`         | string (filepath) | Yes          |            | Path to CSV with at least `panel_id`, `hour`, `voltage`, `current`.                                          |
+| `failure_threshold` | numeric           | No           | `0.7`       | Fraction of each panel’s **baseline power** used as its failure power level (e.g., `0.7` = 70% of baseline). |
+
+### Outputs 
+
+| **Element**   | **Type**          | **Description**                                        |
+| ------------- | ----------------- | ------------------------------------------------------ |
+| `ttf_results` | tibble/data frame | Per-panel regression coefficients and TTF estimates.   |
+| `mean_ttf`    | numeric           | Mean TTF across panels (hrs)|
+
+--- 
+
+
+## 4) `plot_ttf()`  *(defined in `code/plot_ttf.R`)*
+
+**Description**  
+This function estimates the time to failure (TTF) for each panel
+
+---
+
+**Function Call**
+```r
+plot_ttf(ttf_results, top_n = 10) 
+
+```
+
+### Inputs 
+
+| **Parameter** | **Type**            | **Required** | **Default** | **Description**                                                                                  |
+| ------------- | ------------------- | ------------ | ----------- | ------------------------------------------------------------------------------------------------ |
+| `ttf_results` | data frame / tibble | Yes          | —           | Per-panel results from `calculate_ttf()`. Must include columns `panel_id` and `time_to_failure`. |
+| `top_n`       | integer             | No           | `10`        | Number of highest-risk panels to display (lowest TTF values).                                    |
+
+
+### Outputs 
+- returns a ggplot
 
 
 
