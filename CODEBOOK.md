@@ -13,7 +13,7 @@ It also lists each function’s purpose, inputs, outputs, and dependencies to en
 | `plot_xbarbar.R` | Plots the average hourly mean power (\(\bar{X}\)\_bar) across all panels for visual QC. | Interactive or static line plot |
 | `app.R` | Shiny dashboard that allows users to upload data, compute statistics, classify panels, and visualize results interactively. | Browser-based interface |
 
-## 1. `hourly_stats_array()`
+## 1) `hourly_stats_array()`  *(defined in `code/calculate_stats.R`)*
 
 **Description** 
 This function computes the hourly summary statistics for voltage, current, and power. 
@@ -22,16 +22,30 @@ This function computes the hourly summary statistics for voltage, current, and p
 ```r
 hourly_stats_array(file)
 
-``` 
+```
 
-## I
 ## Inputs
 
 | **Parameter** | **Type** | **Description** |
 |----------------|-----------|-----------------|
-| `file` | string | Path to a CSV with `time`, `voltage`, and `current` columns. |
+| `file` | string (filepath) |  Path to a CSV containing columns `panel_id`, `time`, `voltage`, `current`. `time' |
+
+## Outputs
+
+| **File** | **Where** | **Description** |
+|----------------|-----------|-----------------|
+| `hourly_stats_results.csv` | working directory (or `/outputs` if you set it) | Hourly baseline with mean and SD for voltage, current, and power. |
 
 ---
 
-### Outputs
+## Returned Object 
+
+| **Column**                   | **Description**               |
+| ---------------------------- | ----------------------------- |
+| `voltage_mean`, `voltage_sd` | Hourly mean and SD of voltage |
+| `current_mean`, `current_sd` | Hourly mean and SD of current |
+| `power_mean`, `power_sd`     | Hourly mean and SD of power   |
+| *(rownames = `hour`)*        | Hours 0–23 as row names       |
+
+
 
