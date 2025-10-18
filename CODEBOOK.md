@@ -9,7 +9,7 @@ It also lists each function’s purpose, inputs, outputs, and dependencies to en
 |--------|----------|-------------|
 | `calculate_performance.R` | Computes statistics for voltage and power across all panels and detects shading and degradation. | 'panel_hourly_performance_sigma.csv' & 'panel_daily_average_sigma.csv' |
 | `plot_panel_map.R` | Creates a color-coded grid visualization of shading and degradation severity. | ggplot |
-| `plot_xbarbar.R` | Plots the average hourly mean power (\(\bar{X}\)\_bar) across all panels for visual QC. | Average Control Chart |
+| `plot_xbarbar.R` | Plots the average hourly mean power (x bar) across all panels for visual QC. | Average Control Chart |
 | `app.R` | Shiny dashboard that allows users to upload data, compute statistics, classify panels, and visualize results interactively. | Interface |
 
 ## 1) `calculate_performance()`  *(defined in `code/calculate_performance.R`)*
