@@ -13,7 +13,7 @@ hourly_stats_array <- function(file) {
   # create hour and power columns 
   df <- data %>%
     mutate(
-      hour = as.numeric(gsub(":.*", "", time)),   # extract hour number from "0:00"
+      hour = as.numeric(gsub(":.*", "", time)), # extract hour number from "0:00"
       power = voltage * current
     )
   
@@ -22,13 +22,13 @@ hourly_stats_array <- function(file) {
   hour_stats <- df %>%
     group_by(hour) %>%
     summarise(
-      n_obs        = n(),
+      n_obs = n(),
       voltage_mean = mean(voltage, na.rm = TRUE),
-      voltage_sd   = sd(voltage, na.rm = TRUE),
+      voltage_sd = sd(voltage, na.rm = TRUE),
       current_mean = mean(current, na.rm = TRUE),
-      current_sd   = sd(current, na.rm = TRUE),
-      power_mean   = mean(power, na.rm = TRUE),
-      power_sd     = sd(power, na.rm = TRUE),
+      current_sd = sd(current, na.rm = TRUE),
+      power_mean = mean(power, na.rm = TRUE),
+      power_sd = sd(power, na.rm = TRUE),
       .groups = "drop"
     ) %>%
     arrange(hour)
@@ -56,4 +56,6 @@ hourly_stats_array <- function(file) {
 res <- hourly_stats_array("code/solar_data - solar_data.csv")
 panel_data <- read.csv("code/solar_data - solar_data.csv")
 hourly_stats_array(panel_data)  
+
+
 
