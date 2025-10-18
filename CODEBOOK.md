@@ -49,7 +49,31 @@ hourly_stats_array(file)
 
 ---
 
+## 5) `plot_panel_map()`  *(defined in `code/plot_panel_map.R`)*
 
+**Description**  
+Renders a grid heatmap of the solar array where each tile is a panel (`P001`…`P100`).  
+Color encodes a chosen performance metric (default `avg_power`) on a **0–1** scale  
+(low = red, mid = yellow, high = green).
 
+--- 
+
+**Function Call**
+```r
+plot_panel_map(panel_data,
+               nrows = 10,
+               total_panels = 100,
+               value_col = "avg_power",
+               title = "Solar Panel Performance")
+
+```
+
+| **Parameter**  | **Type**   | **Required**               | **Description**                                                                    |
+| -------------- | ---------- | -------------------------- | ---------------------------------------------------------------------------------- |
+| `panel_data`   | data frame | Yes                        | Must include `panel_id` (`P001`…`P###`) and a numeric column named by `value_col`. |
+| `nrows`        | integer    | No (default 10)            | Number of rows in the farm grid.                                                   |
+| `total_panels` | integer    | No (default 100)           | Total number of panels (used to compute columns).                                  |
+| `value_col`    | string     | No (default `"avg_power"`) | Name of the column to visualize (0–1 recommended).                                 |
+| `title`        | string     | No                         | Plot title shown above the map.                                                    |
 
 
