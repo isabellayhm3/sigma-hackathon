@@ -1,15 +1,16 @@
-average_chart <- function(file) {
+#Install packages
   library(tidyverse)
   library(ggplot2)
   library(readxl)
   
-  
-  # load data 
+#function to make the average control chart
+average_chart <- function(file) {
+  #load data 
   df <- readr::read_csv(file, show_col_types = FALSE) %>% 
     mutate(voltage = as.numeric(voltage)) %>%
     drop_na(voltage)
   
-  # calculate subgroup stats
+  #calculate subgroup stats
   sub_stats <- df %>%
     group_by(panel_id) %>%
     summarise(
@@ -22,15 +23,15 @@ average_chart <- function(file) {
     ) %>% 
     mutate(subgroup = as.integer(factor(panel_id)))
   
-  # center and spread estimates for xbar 
+  #centerline and upper and lower control limits for xbar 
   xbarbar <- mean(sub_stats$xbar, na.rm = TRUE)
   Rbar <- mean(sub_stats$R, na.rm = TRUE)
   
-  # subgroup size (median readings per panel) 
+  #subgroup size 
   n_eff <- stats::median(sub_stats$n, na.rm = TRUE)
   n_eff_rounded <- pmin(pmax(round(n_eff),2),25)
   
-  # d2 constants
+  #d2 constants
   d2_table <- tibble(
     n  = 2:25,
     d2 = c(1.128,1.693,2.059,2.326,2.534,2.704,2.847,2.970,3.078,3.173,
@@ -42,6 +43,7 @@ average_chart <- function(file) {
   sigmahat   <- Rbar / d2
   SE_overall <- sigmahat / sqrt(n_eff) 
   
+  #standard error lines
   UCL <- xbarbar + 3 * sigmahat / sqrt(n_eff)
   LCL <- xbarbar - 3 * sigmahat / sqrt(n_eff)
   sd1 <- xbarbar - 2 * sigmahat / sqrt(n_eff)
@@ -50,7 +52,7 @@ average_chart <- function(file) {
   sd4 <- xbarbar + 1 * sigmahat / sqrt(n_eff)
   
   
-  # plot 
+  #plot 
   p <- ggplot(sub_stats %>% arrange(subgroup),
               aes(x = reorder(as.character(panel_id), subgroup), y = xbar, group = 1)) +
     geom_line() +
@@ -73,4 +75,3 @@ average_chart <- function(file) {
 }
 
 avg_chart <- average_chart("code/solar_data_normal.csv")
-
