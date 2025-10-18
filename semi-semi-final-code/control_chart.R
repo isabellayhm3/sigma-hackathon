@@ -74,4 +74,3 @@ average_chart <- function(file) {
   print(p)
 }
 
-avg_chart <- average_chart("code/solar_data_normal.csv")
