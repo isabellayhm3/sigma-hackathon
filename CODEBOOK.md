@@ -40,7 +40,7 @@ hourly_stats_array(file)
 | **Column**                      | **Description** |
 | ------------------------------- | ---------- |
 | `panel_id`                      | Unique panel identifier |
-| `hour`                          | Hour of the day  |
+| `hour`                          | Hour of the day (6–18) |
 | `voltage`, `current`, `power`   | Raw readings and computed power  |
 | `mean_power`, `sd_power`        | Hourly group mean and SD of power                           |
 | `norm_power`                    | Six Sigma normalized performance (0–1, where 1 = excellent) |
@@ -53,7 +53,7 @@ hourly_stats_array(file)
 **Description**  
 Renders a grid heatmap of the solar array where each tile is a panel (`P001`…`P100`).  
 Color encodes a chosen performance metric (default `avg_power`) on a **0–1** scale  
-(little to none = black, low = red, mid = yellow, high = green).
+(low = red, mid = yellow, high = green).
 
 --- 
 
@@ -66,18 +66,25 @@ plot_panel_map(panel_data,
                title = "Solar Panel Performance")
 
 ```
+### Inputs 
 
 | **Parameter**  | **Type**   | **Required**               | **Description**                                                                    |
 | -------------- | ---------- | -------------------------- | ---------------------------------------------------------------------------------- |
-| `panel_data`   | data frame | Yes                        | Raw data for solar panels. |
+| `panel_data`   | data frame | Yes                        | Must include `panel_id` (`P001`…`P###`) and a numeric column named by `value_col`. |
 | `nrows`        | integer    | No (default 10)            | Number of rows in the farm grid.                                                   |
-| `total_panels` | integer    | No (default 100)           | Total number of panels.                                  |
-| `value_col`    | string     | No (default `"avg_power"`) | Name of the column to visualize.                                 |
+| `total_panels` | integer    | No (default 100)           | Total number of panels (used to compute columns).                                  |
+| `value_col`    | string     | No (default `"avg_power"`) | Name of the column to visualize (0–1 recommended).                                 |
 | `title`        | string     | No                         | Plot title shown above the map.                                                    |
+### Output 
+- returns a ggplot object 
 
+### Color Scale + Layout 
+- Fill colors: red, yellow, green
+- Range 0-1
 --- 
 
-## 6) `average_chart()`  *(defined in `code/average_chart.R`)*
+
+## 3) `average_chart()`  *(defined in `code/average_chart.R`)*
 
 **Description**  
 This function creates a control chart of the daily mean and voltage by panel. The subgroup is each panel, and the subgroup size is the number of voltage readings per panel 
@@ -90,14 +97,18 @@ average_chart(file)
 
 ```
 
+### Inputs 
+
 | **Parameter** | **Type**          | **Required** | **Description**                                                                                  |
 | ------------- | ----------------- | ------------ | ------------------------------------------------------------------------------------------------ |
-| `file`        | string (filepath) | Yes          | Path to a CSV containing at least `panel_id` and `voltage` (numeric). |
+| `file`        | string (filepath) | Yes          | Path to a CSV containing at least `panel_id` and `voltage` (numeric). Extra columns are ignored. |
 
 
-## Output 
+### Output 
 
 Displays a ggplot with xbar control chart 
+
+### Key Variable Definitions 
 
 | **Variable** | **Description** |
 |---------------|----------------|
