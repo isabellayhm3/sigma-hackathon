@@ -1,6 +1,6 @@
 # Dataset Documentation
 
-We provide three small, synthetic datasets for testing and demonstration.
+We provide three synthetic datasets for testing and demonstration.
 
 ## File Overview 
 
