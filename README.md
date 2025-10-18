@@ -15,7 +15,7 @@ Our R-based tool analyzes utility-scale solar farm performance to flag **shading
 2. Open in RStudio or Posit Cloud
 3. Run `app.R`
 
-Requires R ≥ 4.2.
+Requires R
 
 ```r
 install.packages(c(
@@ -24,4 +24,4 @@ install.packages(c(
 ))
 
 ## Project Structure
-See `/code` for analysis scripts and `/solar_data1` for example datasets.
+See `/code` for analysis scripts and `/data_sets` for example datasets.
