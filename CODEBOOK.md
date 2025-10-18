@@ -5,12 +5,14 @@ It also lists each function’s purpose, inputs, outputs, and dependencies to en
 
 ## Overview of Scripts
 
-| Script | Purpose | Output |
-|--------|----------|-------------|
-| `calculate_performance.R` | Computes statistics for voltage and power across all panels and detects shading and degradation. | 'panel_hourly_performance_sigma.csv' & 'panel_daily_average_sigma.csv' |
-| `plot_panel_map.R` | Creates a color-coded grid visualization of shading and degradation severity. | ggplot |
-| `plot_xbarbar.R` | Plots the average hourly mean power (x bar) across all panels for visual QC. | Average Control Chart |
-| `app.R` | Shiny dashboard that allows users to upload data, compute statistics, classify panels, and visualize results interactively. | Interface |
+| **Script** | **Purpose** | **Primary Output(s)** |
+|-------------|-------------|-----------------------|
+| `calculate_performance.R` | Computes Six Sigma–based performance statistics for voltage, current, and power across all solar panels; identifies underperforming or shaded panels. | `panel_hourly_performance_sigma.csv`, `panel_daily_average_sigma.csv` |
+| `plot_panel_map.R` | Creates a color-coded grid visualization of panel performance, mapping degradation or shading severity spatially. | `ggplot` heatmap (can be exported as `.png`) |
+| `control_chart.R` | Generates an **X-bar control chart** to visualize average panel voltage variation over time and control limits for quality monitoring. | `ggplot` line chart |
+| `calculate_ttf.R` | Calculates **Time to Failure (TTF)** for each solar panel by fitting linear models to predict when power output drops below a threshold (default 70% of baseline). | R list containing `ttf_results` (data frame) and `mean_ttf` (numeric) |
+| `plot_ttf.R` | Visualizes **Top N panels at risk of failure** using horizontal bar charts with color-coded risk categories (high, moderate, low). | `ggplot` bar chart |
+| `app.R` | Integrates all functions into an interactive **Shiny dashboard**, enabling users to upload datasets, run analyses, view control charts, degradation maps, and TTF results interactively. | Shiny web interface |
 
 ## 1) `calculate_performance()`  *(defined in `code/calculate_performance.R`)*
 
