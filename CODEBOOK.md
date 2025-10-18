@@ -75,4 +75,46 @@ plot_panel_map(panel_data,
 | `value_col`    | string     | No (default `"avg_power"`) | Name of the column to visualize (0–1 recommended).                                 |
 | `title`        | string     | No                         | Plot title shown above the map.                                                    |
 
+--- 
+
+## 6) `average_chart()`  *(defined in `code/average_chart.R`)*
+
+**Description**  
+This function creates a control chart of the daily mean and voltage by panel. The subgroup is each panel, and the subgroup size is the number of voltage readings per panel 
+
+---
+
+**Function Call**
+```r
+average_chart(file)
+
+```
+
+| **Parameter** | **Type**          | **Required** | **Description**                                                                                  |
+| ------------- | ----------------- | ------------ | ------------------------------------------------------------------------------------------------ |
+| `file`        | string (filepath) | Yes          | Path to a CSV containing at least `panel_id` and `voltage` (numeric). Extra columns are ignored. |
+
+
+## Output 
+
+Displays a ggplot with xbar control chart 
+
+| **Variable** | **Description** |
+|---------------|----------------|
+| `xbar` | Mean voltage for each panel, calculated as `mean(voltage)`. |
+| `R` | Range of voltage values for each panel, calculated as `max(voltage) - min(voltage)`. |
+| `xbarbar` | Overall mean of the `xbar` values across all panels. |
+| `Rbar` | Mean of the `R` values across all panels. |
+| `n` | Number of voltage readings per panel. |
+| `n_eff` | Median of `n` values across all panels (effective subgroup size). |
+| `d2` | Bias correction constant selected based on the rounded value of `n_eff` (from the lookup table for sample sizes 2–25). |
+| `sigmahat` | Estimated short-term standard deviation, calculated as `Rbar / d2`. |
+| `SE_overall` | Overall standard error, calculated as `sigmahat / sqrt(n_eff)` (used for control limits). |
+| `UCL` and `LCL` | Upper and lower control limits, calculated as `xbarbar ± 3 * SE_overall`. |
+| `sd1`, `sd2`, `sd3`, `sd4` | One- and two-standard-deviation guide lines around the center line (`xbarbar`). |
+
+
+
+
+
 
