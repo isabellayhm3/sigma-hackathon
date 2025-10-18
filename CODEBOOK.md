@@ -48,7 +48,7 @@ hourly_stats_array(file)
 
 ---
 
-## 5) `plot_panel_map()`  *(defined in `code/plot_panel_map.R`)*
+## 2) `plot_panel_map()`  *(defined in `code/plot_panel_map.R`)*
 
 **Description**  
 Renders a grid heatmap of the solar array where each tile is a panel (`P001`…`P100`).  
