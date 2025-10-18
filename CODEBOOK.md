@@ -13,39 +13,43 @@ It also lists each function’s purpose, inputs, outputs, and dependencies to en
 | `plot_xbarbar.R` | Plots the average hourly mean power (\(\bar{X}\)\_bar) across all panels for visual QC. | Interactive or static line plot |
 | `app.R` | Shiny dashboard that allows users to upload data, compute statistics, classify panels, and visualize results interactively. | Browser-based interface |
 
-## 1) `hourly_stats_array()`  *(defined in `code/calculate_stats.R`)*
+## 1) `calculate_performance()`  *(defined in `code/calculate_performance.R`)*
 
 **Description** 
-This function computes the hourly summary statistics for voltage, current, and power. 
+fix this 
 
 **Function Call:**
 ```r
 hourly_stats_array(file)
 
 ```
-
-## Inputs
+### Inputs
 
 | **Parameter** | **Type** | **Description** |
 |----------------|-----------|-----------------|
-| `file` | string (filepath) |  Path to a CSV containing columns `panel_id`, `time`, `voltage`, `current`. `time' |
+| `data_file` | string (filepath) |  Path to a CSV containing columns `panel_id`, `hour`, `voltage`, `current`. |
 
-## Outputs
+### Outputs
 
-| **File** | **Where** | **Description** |
-|----------------|-----------|-----------------|
-| `hourly_stats_results.csv` | working directory (or `/outputs` if you set it) | Hourly baseline with mean and SD for voltage, current, and power. |
+| **File** | **Description** |
+| ------------------------------------ | ------------------- |
+| `panel_hourly_performance_sigma.csv` | Hour-by-hour normalized performance (0–1 scale) for each panel. |
+| `panel_daily_average_sigma.csv`| Average normalized power per panel (daily mean).|
+
+### Key Columns in Output Files 
+
+| **Column**                      | **Description** |
+| ------------------------------- | ---------- |
+| `panel_id`                      | Unique panel identifier |
+| `hour`                          | Hour of the day (6–18) |
+| `voltage`, `current`, `power`   | Raw readings and computed power  |
+| `mean_power`, `sd_power`        | Hourly group mean and SD of power                           |
+| `norm_power`                    | Six Sigma normalized performance (0–1, where 1 = excellent) |
+| `avg_power` *(daily file only)* | Daily average normalized power per panel                    |
 
 ---
 
-## Returned Object 
 
-| **Column**                   | **Description**               |
-| ---------------------------- | ----------------------------- |
-| `voltage_mean`, `voltage_sd` | Hourly mean and SD of voltage |
-| `current_mean`, `current_sd` | Hourly mean and SD of current |
-| `power_mean`, `power_sd`     | Hourly mean and SD of power   |
-| *(rownames = `hour`)*        | Hours 0–23 as row names       |
 
 
 
