@@ -7,7 +7,7 @@ It also lists each function’s purpose, inputs, outputs, and dependencies to en
 
 | Script | Purpose | Output |
 |--------|----------|-------------|
-| `calculate_performance.R` | Computes hourly statistics for voltage, current, and power across all panels and detects shading and degradation. | 'panel_hourly_performance_sigma.csv' & 'panel_daily_average_sigma.csv' |
+| `calculate_performance.R` | Computes statistics for voltage and power across all panels and detects shading and degradation. | 'panel_hourly_performance_sigma.csv' & 'panel_daily_average_sigma.csv' |
 | `plot_panel_map.R` | Creates a color-coded grid visualization of shading and degradation severity. | ggplot |
 | `plot_xbarbar.R` | Plots the average hourly mean power (\(\bar{X}\)\_bar) across all panels for visual QC. | Average Control Chart |
 | `app.R` | Shiny dashboard that allows users to upload data, compute statistics, classify panels, and visualize results interactively. | Interface |
@@ -15,7 +15,7 @@ It also lists each function’s purpose, inputs, outputs, and dependencies to en
 ## 1) `calculate_performance()`  *(defined in `code/calculate_performance.R`)*
 
 **Description** 
-fix this 
+Calculates statistics for the voltage and uses them to classify performance within standard deviation metrics and outputs a file containing severity ratings for each panel.
 
 **Function Call:**
 ```r
@@ -51,9 +51,9 @@ hourly_stats_array(file)
 ## 2) `plot_panel_map()`  *(defined in `code/plot_panel_map.R`)*
 
 **Description**  
-Renders a grid heatmap of the solar array where each tile is a panel (`P001`…`P100`).  
-Color encodes a chosen performance metric (default `avg_power`) on a **0–1** scale  
-(low = red, mid = yellow, high = green).
+Renders a grid heatmap of the solar array where each tile is a panel.  
+Color shows the severity on a **0–1** scale  
+(little to none = grey, low = red, mid = yellow, high = green).
 
 --- 
 
@@ -87,7 +87,7 @@ plot_panel_map(panel_data,
 ## 3) `average_chart()`  *(defined in `code/average_chart.R`)*
 
 **Description**  
-This function creates a control chart of the daily mean and voltage by panel. The subgroup is each panel, and the subgroup size is the number of voltage readings per panel 
+Creates a control chart of the daily mean and voltage by panel.
 
 ---
 
