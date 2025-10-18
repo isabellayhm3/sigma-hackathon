@@ -1,195 +1,137 @@
-# -------------------------------------------------------------
-# app.R — Solar Panel Health Dashboard
-# -------------------------------------------------------------
-# Features:
-# - Upload CSV input
-# - Compute hourly statistics
-# - Classify shading vs. degradation
-# - Display condition map
-# - Estimate and plot Time to Failure (TTF)
-# - Placeholder Control Chart tab
-# -------------------------------------------------------------
-
-options(repos = c(CRAN = "https://cloud.r-project.org"))
-
 library(shiny)
 library(ggplot2)
 library(dplyr)
 library(readr)
-library(tools)
 
-# --- Load helper functions ---
-source("code/calculate_stats.R")     # hourly_stats_array()
-source("code/classify_panels.R")     # classify_panels()
-source("code/plot_panel_map.R")      # plot_panel_map()
-source("code/calculate_ttf.R")       # calculate_ttf()
-source("code/plot_ttf.R")            # plot_ttf()
+# ---- Source helper scripts ----
+source("code/calculate_performance.R")
+source("testing/plot_panel_map.R")
+source("code/control_chart.R")
 
-# -------------------------------------------------------------
-# USER INTERFACE
-# -------------------------------------------------------------
+# ---- UI ----
 ui <- fluidPage(
-  titlePanel("☀️ Solar Panel Health Dashboard"),
-
+  titlePanel("Solar Panel Performance Dashboard"),
+  
   sidebarLayout(
     sidebarPanel(
-      fileInput(
-        "file_upload",
-        "Upload Solar Data (CSV):",
-        accept = c(".csv")
-      ),
-      actionButton("run", "Run Analysis", class = "btn-primary"),
-      br(), br(),
-      h4("Legend"),
-      tags$ul(
-        tags$li("🟩 Green → Healthy"),
-        tags$li("🟨 Yellow → Mild Degradation"),
-        tags$li("🟥 Red → Severe Degradation"),
-        tags$li("⬛ Dark Tint → Shading Influence"),
-        tags$li("⬜ Gray → No Sunlight (Nighttime)")
-      ),
-      hr(),
-      helpText("Upload a CSV with columns: panel_id, hour (or time), voltage, current.")
+      fileInput("datafile", "Upload Solar Data CSV",
+                accept = c(".csv"),
+                buttonLabel = "Browse...",
+                placeholder = "No file selected"),
+      br(),
+      uiOutput("upload_status"),
+      width = 3
     ),
-
+    
     mainPanel(
       tabsetPanel(
-        type = "tabs",
-
-        # --- Tab 1: Condition Map ---
-        tabPanel("Condition Map",
-                 plotOutput("panel_map", height = "600px"),
+        
+        # ---------- TAB 1: DAILY AVERAGE MAP ----------
+        tabPanel("Daily Averages",
                  br(),
-                 tableOutput("summary_table")
+                 div(style = "font-style: italic; color: #555; margin-bottom: 10px;",
+                     "Performance values are normalized using Six Sigma principles: 1.0 represents the mean performance across all panels, while 0 corresponds to a value three standard deviations below the mean."),
+                 plotOutput("daily_map", height = "600px"),
+                 br(),
+                 uiOutput("low_panel_message")
         ),
-
-        # --- Tab 2: Time Till Failure ---
-        tabPanel("Time Till Failure",
-                 h3("Predicted Time to Failure (TTF)"),
-                 p("Estimated number of hours until each panel is expected to fall below 70% of its initial power output."),
+        
+        # ---------- TAB 2: HOURLY PERFORMANCE ----------
+        tabPanel("Hourly Performance",
+                 sliderInput(
+                   "hour",
+                   "Select Hour (6–18):",
+                   min = 6, max = 18, value = 12, step = 1,
+                   animate = animationOptions(interval = 900, loop = TRUE)
+                 ),
                  br(),
-                 plotOutput("ttf_plot", height = "500px"),
-                 br(),
-                 tableOutput("ttf_summary")
+                 div(style = "font-style: italic; color: #555; margin-bottom: 10px;",
+                     "Hourly performance is displayed on a 0–1 scale, where 1.0 represents the mean power output for that hour, and 0 indicates a value three standard deviations below the mean."),
+                 plotOutput("hourly_map", height = "600px")
         ),
-
-        # --- Tab 3: Control Chart (placeholder) ---
+        
+        # ---------- TAB 3: CONTROL CHART ----------
         tabPanel("Control Chart",
-                 h3("Statistical Process Control"),
-                 p("This section shows hourly variation and 3σ control limits for monitoring process stability."),
                  br(),
-                 plotOutput("control_chart", height = "400px"),
-                 br(),
-                 p("Use this to detect drift, unusual variance, or measurement noise.")
+                 div(style = "font-style: italic; color: #555; margin-bottom: 10px;",
+                     "This X̄ control chart displays the mean voltage across all panels at 12:00 PM, with ±3σ control limits derived from process variation."),
+                 plotOutput("control_chart", height = "600px")
         )
-      )
+      ),
+      width = 9
     )
   )
 )
 
-# -------------------------------------------------------------
-# SERVER LOGIC
-# -------------------------------------------------------------
+# ---- SERVER ----
 server <- function(input, output, session) {
-
-  # --- Data processing pipeline ---
-  results <- eventReactive(input$run, {
-    req(input$file_upload)
-
-    # === 1️⃣ Read and clean uploaded file ===
-    file_path <- input$file_upload$datapath
-    raw_data <- readr::read_csv(file_path, show_col_types = FALSE)
-
-    # Clean and standardize column names
-    names(raw_data) <- names(raw_data) %>%
-      trimws() %>%
-      tolower() %>%
-      gsub("\\s+", "_", .) %>%
-      gsub("[^a-z0-9_]", "", .)
-
-    # === 2️⃣ Handle "hour" vs "time" naming ===
-    if ("hour" %in% names(raw_data) && !("time" %in% names(raw_data))) {
-      raw_data <- raw_data %>% rename(time = hour)
-    }
-
-    # === 3️⃣ Validate required columns ===
-    validate(
-      need("panel_id" %in% names(raw_data), "❌ Missing 'panel_id' column in CSV."),
-      need("time" %in% names(raw_data), "❌ Missing 'time' or 'hour' column in CSV."),
-      need("voltage" %in% names(raw_data), "❌ Missing 'voltage' column in CSV."),
-      need("current" %in% names(raw_data), "❌ Missing 'current' column in CSV.")
-    )
-
-    # === 4️⃣ Save cleaned data to a temporary CSV ===
-    cleaned_path <- tempfile(fileext = ".csv")
-    readr::write_csv(raw_data, cleaned_path)
-
-    # === 5️⃣ Run hourly stats ===
-    hourly_stats <- hourly_stats_array(cleaned_path)
-
-    baseline_file <- paste0("hourly_stats_", tools::file_path_sans_ext(basename(cleaned_path)), ".csv")
-    write.csv(hourly_stats, baseline_file, row.names = TRUE)
-
-    # === 6️⃣ Run panel classification ===
-    classified_summary <- classify_panels(
-      data_file = cleaned_path,
-      baseline_file = baseline_file
-    ) %>%
-      rename(PanelID = panel_id)
-
-    list(hourly = hourly_stats, classified = classified_summary, raw = cleaned_path)
+  
+  # ---- 1. Reactive file processing ----
+  perf_data <- reactive({
+    req(input$datafile)
+    
+    tryCatch({
+      perf <- calculate_performance(input$datafile$datapath)
+      output$upload_status <- renderUI({
+        div(style = "color: green; font-weight: bold; margin-top: 10px;",
+            paste("✅ File loaded successfully:", input$datafile$name))
+      })
+      return(perf)
+    },
+    error = function(e) {
+      output$upload_status <- renderUI({
+        div(style = "color: red; font-weight: bold; margin-top: 10px;",
+            paste("❌ Error loading file:", e$message))
+      })
+      return(NULL)
+    })
   })
-
-  # --- Tab 1: Condition Map ---
-  output$panel_map <- renderPlot({
-    req(results())
-    plot_panel_map(results()$classified, nrows = 10, total_panels = 100)
+  
+  # ---- 2. Daily average performance map ----
+  output$daily_map <- renderPlot({
+    req(perf_data())
+    plot_panel_map(perf_data()$daily,
+                   value_col = "avg_power",
+                   title = "Average Daily Panel Performance")
   })
-
-  output$summary_table <- renderTable({
-    req(results())
-    as.data.frame(
-      results()$classified %>%
-        summarise(
-          Avg_Shading = round(mean(Shading, na.rm = TRUE), 3),
-          Avg_Degradation = round(mean(Degradation, na.rm = TRUE), 3),
-          Affected_Panels = sum(Shading > 0 | Degradation > 0)
-        )
-    )
-  })
-
-  # --- Tab 2: Time Till Failure (TTF) ---
-  output$ttf_plot <- renderPlot({
-    req(results())
-    ttf_data <- calculate_ttf(results()$raw)
-    plot_ttf(ttf_data)
-  })
-
-  output$ttf_summary <- renderTable({
-    req(results())
-    ttf_data <- calculate_ttf(results()$raw)
-    as.data.frame(ttf_data %>%
-      summarise(
-        Avg_TTF = round(mean(time_to_failure, na.rm = TRUE), 2),
-        Min_TTF = round(min(time_to_failure, na.rm = TRUE), 2),
-        Max_TTF = round(max(time_to_failure, na.rm = TRUE), 2)
+  
+  # ---- 3. Low performance alert ----
+  output$low_panel_message <- renderUI({
+    req(perf_data())
+    daily <- perf_data()$daily
+    low_perf <- daily %>% filter(avg_power < 0.6)
+    
+    if (nrow(low_perf) == 0) return(NULL)
+    
+    panel_list <- paste(low_perf$panel_id, collapse = ", ")
+    
+    div(
+      style = "padding: 15px; background-color: #fff3cd; border-left: 5px solid #ffb300; margin-top: 10px; border-radius: 5px;",
+      strong("⚠️ Performance Alert: "),
+      paste(
+        "Panels", panel_list,
+        "are performing more than two standard deviations below the mean.",
+        "We recommend inspecting these units for potential shading, degradation, or electrical issues."
       )
     )
   })
-
-  # --- Tab 3: Control Chart (placeholder for now) ---
+  
+  # ---- 4. Hourly performance map ----
+  output$hourly_map <- renderPlot({
+    req(perf_data())
+    hourly <- perf_data()$hourly
+    df_filtered <- hourly %>% filter(hour == input$hour)
+    plot_panel_map(df_filtered,
+                   value_col = "norm_power",
+                   title = paste("Hourly Performance —", input$hour, ":00"))
+  })
+  
+  # ---- 5. Control chart (12:00 PM) ----
   output$control_chart <- renderPlot({
-    req(results())
-    ggplot() +
-      annotate("text", x = 1, y = 1,
-               label = "📈 Control Chart feature under development!",
-               size = 6, color = "#607D8B") +
-      theme_void() +
-      theme(plot.background = element_rect(fill = "#F7F9FB", color = NA))
+    req(input$datafile)
+    average_chart(input$datafile$datapath)
   })
 }
 
-# -------------------------------------------------------------
-# Run the App
-# -------------------------------------------------------------
+# ---- Run App ----
 shinyApp(ui, server)
