@@ -40,7 +40,7 @@ hourly_stats_array(file)
 | **Column**                      | **Description** |
 | ------------------------------- | ---------- |
 | `panel_id`                      | Unique panel identifier |
-| `hour`                          | Hour of the day (6–18) |
+| `hour`                          | Hour of the day  |
 | `voltage`, `current`, `power`   | Raw readings and computed power  |
 | `mean_power`, `sd_power`        | Hourly group mean and SD of power                           |
 | `norm_power`                    | Six Sigma normalized performance (0–1, where 1 = excellent) |
