@@ -2,46 +2,39 @@ library(ggplot2)
 library(dplyr)
 
 plot_panel_map <- function(panel_data, nrows, total_panels, aspect_ratio = 2) {
-  # Colors for green, shading, and degradation
-  green_rgb <- c(0, 230, 0)       # healthy
-  red_rgb   <- c(230, 0, 0)       # degradation
-  grey_rgb  <- c(63, 94, 122)     # shading
-  
-  # Normalize RGB to 0-1 for the degradation and shading factors
-  green_rgb <- green_rgb / 255
-  red_rgb   <- red_rgb / 255
-  grey_rgb  <- grey_rgb / 255
-  
-  # Calculate number of columns
+  # Number of columns
   ncols <- ceiling(total_panels / nrows)
   
-  # Generate grid positions
+  # Grid positions
   panel_positions <- expand.grid(
     Row = seq_len(nrows),
     Col = seq_len(ncols)
   ) %>%
     mutate(PanelID = sprintf("P%03d", seq_len(n())))
   
-  # Merge with data
+  # Merge data
   df <- left_join(panel_positions, panel_data, by = "PanelID") %>%
     mutate(
       Degradation = ifelse(is.na(Degradation), 0, Degradation),
       Shading = ifelse(is.na(Shading), 0, Shading)
     )
   
+  # Degradation gradient: green → yellow → red
+  deg_colors <- colorRamp(c("green", "yellow", "red")) # returns function
+  
+  # Shading color: grey → black
+  shade_colors <- colorRamp(c(rgb(63/255, 94/255, 122/255), "black"))
+  
   # Compute blended color
   df <- df %>%
     rowwise() %>%
     mutate(
-      r = green_rgb[1] * (1 - Degradation - Shading) +
-        red_rgb[1] * Degradation +
-        grey_rgb[1] * Shading,
-      g = green_rgb[2] * (1 - Degradation - Shading) +
-        red_rgb[2] * Degradation +
-        grey_rgb[2] * Shading,
-      b = green_rgb[3] * (1 - Degradation - Shading) +
-        red_rgb[3] * Degradation +
-        grey_rgb[3] * Shading,
+      base_rgb = deg_colors(Degradation)/255,
+      shade_rgb = shade_colors(Shading)/255,
+      # Combine: shading darkens the base color
+      r = (1 - Shading) * base_rgb[1] + Shading * shade_rgb[1],
+      g = (1 - Shading) * base_rgb[2] + Shading * shade_rgb[2],
+      b = (1 - Shading) * base_rgb[3] + Shading * shade_rgb[3],
       color = rgb(r, g, b)
     )
   
@@ -62,7 +55,5 @@ plot_panel_map <- function(panel_data, nrows, total_panels, aspect_ratio = 2) {
     coord_fixed(ratio = 1 / aspect_ratio) +
     scale_y_reverse() +
     theme_void() +
-    theme(
-      plot.background = element_rect(fill = "white", color = NA)
-    )
+    theme(plot.background = element_rect(fill = "white", color = NA))
 }
