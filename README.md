@@ -34,7 +34,7 @@ Requires R
 
 ```r
 install.packages(c(
-  "dplyr","tidyr","readr","lubridate","rlang",
+  "dplyr","tidyr","tidyverse","readr","lubridate","rlang",
   "stringr","purrr","ggplot2","shiny"
 ))
 
